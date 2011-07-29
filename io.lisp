@@ -5,7 +5,7 @@
 (defparameter *corpus* nil)
 
 (defmacro make-corpus-file (filename corpus-variable)
-  "Used to find static files. Remember to quote the corpus variable"
+  "Used to find static files."
   `(let ((corpus-file (cl-fad:file-exists-p (merge-pathnames (make-pathname :directory '(:relative "Lisp" "bothoa-parser")
                                                                             :name ,filename)
                                                              (user-homedir-pathname)))))
