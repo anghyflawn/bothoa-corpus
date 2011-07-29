@@ -8,17 +8,17 @@
   (setf *test-corpus* nil)
   (iterate (for line in-file filename using #'read-line)
 	   (pushnew (make-entry line) *test-corpus*)))
-x
+
 (make-test-corpus)
 
 (define-test make-entry
   (assert-equal "tˈaːɲər" (print-entry (make-entry "ˈtaːɲər")))
-  (assert-equal "tʃˈẽːzəɡˌon" (print-entry (make-entry "ˈtʃẽːzəˌɡon"))))
+  (assert-equal "tʃˈẽːzəɡˌon" (print-entry (make-entry "ˈtʃẽːzəˌɡon"))))
 
 (define-test next-segment
   (assert-equal "e" (segment->string (let ((word (make-word "ten")))
 				       (next-element (first (segments word)) word))))
-  (assert-equal "ãː" (segment->string (let ((word (make-word "stʃãːs")))
+  (assert-equal "ãː" (segment->string (let ((word (make-word "stʃãːs")))
 					(next-element (second (segments word)) word))))
   (assert-equal "d" (segment->string (let* ((entry (make-entry "abc def"))
 					    (word (first (words entry))))
