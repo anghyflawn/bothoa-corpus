@@ -1,0 +1,19 @@
+This program is used to parse the text file containing all the forms
+found in
+
+Humphreys, Humphrey Lloyd (1995). Phonologie et morphosyntaxe du
+parler breton de Bothoa en Saint-Nicolas-du-Pélém,
+Côtes-d'Armor. Brest: Emgleo Breiz
+
+The program parses the file and creates a database to represent all
+the data it contains, which can be queried along a variety of
+dimensions such as stress patterns, segment distributions, possible
+and impossible adjacent sequences etc. A number of queries are already
+written and can be combined in various ways.
+
+LICENSE
+Copyright 2011 Pavel Iosad
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the Community Research and Academic Programming
+License (CRAPL). See the LICENSE file for details
