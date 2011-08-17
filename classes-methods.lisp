@@ -171,3 +171,15 @@ e.g. the next segment in a word etc."))
 (defmethod vowels ((word word))
   (remove-if-not #'vowel-p (segments word)))
 
+(defgeneric last-p (segment word)
+  (:documentation "Returns true for final segments in a word"))
+
+(defmethod last-p ((segment segment) (word word))
+  (null (next-element segment word)))
+
+(defgeneric is-a (segment &rest segment-list)
+  (:documentation "Check whether the IPA symbol of a segment is one of
+  those in the segment list; pass as a rest argument"))
+
+(defmethod is-a ((segment segment) &rest segment-list)
+  (member (ipa-symbol segment) segment-list))
