@@ -140,3 +140,15 @@
 	     (and (last-p segment word)
 		  (is-a segment 'v)))
 	   (segments word))))
+
+(defmacro long-before-voiceless (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+		   (some (lambda (segment)
+			   (and (vowel-p segment)
+				(long-p segment)
+				(not (nasal-p segment))
+				(next-element segment word)
+				(not (last-p (next-element segment word) word))
+				(is-a (next-element segment word) 'f 's 'sh 'h)))
+			 (segments word))))
+		   
