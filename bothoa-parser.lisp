@@ -16,7 +16,8 @@
                            word-list))
                    ,corpus
                    :key #'words)
-    :key #'print-entry))
+    :test (lambda (x y)
+	    (equalp (print-entry x) (print-entry y)))))
 
 (defmacro find-entry-with-sequence ((&key (corpus '*corpus*)) sequence)
   `(find-in-corpus (:corpus ,corpus)
@@ -145,10 +146,10 @@
   `(find-in-corpus (:corpus ,corpus)
 		   (some (lambda (segment)
 			   (and (vowel-p segment)
-				(long-p segment)
+				(not (long-p segment))
 				(not (nasal-p segment))
 				(next-element segment word)
 				(not (last-p (next-element segment word) word))
-				(is-a (next-element segment word) 'f 's 'sh 'h)))
+				(is-a (next-element segment word) 'h)))
 			 (segments word))))
 		   

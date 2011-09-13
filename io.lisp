@@ -133,7 +133,7 @@
   (setq *corpus* nil)
   (iterate (for line in-file filename using #'read-line)
 	   (unless (every #'digit-char-p line)
-	     (pushnew (make-entry line) *corpus*))))
+	     (pushnew (make-entry line) *corpus* ))))
 
 (defun print-query (entry-list &key (filename "result"))
   (with-open-file (file filename
