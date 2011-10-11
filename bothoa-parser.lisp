@@ -19,6 +19,11 @@
     :test (lambda (x y)
 	    (equalp (print-entry x) (print-entry y)))))
 
+(defmacro with-next (&body body)
+  `(let* ((next (next-element segment word))
+	  (2nd-next (next-element next word)))
+     ,@body))
+
 (defmacro find-entry-with-sequence ((&key (corpus '*corpus*)) sequence)
   `(find-in-corpus (:corpus ,corpus)
      (search (mapcar #'ipa-symbol (getf (parse (coerce ,sequence 'list))
@@ -64,16 +69,15 @@
 
 (defmacro long-before-muta-cum-liquida (&key (corpus '*corpus*))
   `(find-in-corpus (:corpus ,corpus)
-     (some (lambda (vowel)
-	     (let* ((next (next-element vowel word))
-		    (2nd-next (next-element next word)))
-	       (and (long-p vowel) ; Loads of clauses here.
-		    (not (nasal-p vowel))
+     (some (lambda (segment)
+	     (with-next
+	       (and (long-p segment) ; Loads of clauses here.
+		    (not (nasal-p segment))
 		    (not (null next))
 		    (not (null 2nd-next))
 		    (consonant-p next)
-		    (equal (stressed vowel word) 's)
-		    (member (ipa-symbol 2nd-next) '(r l n m)))))
+		    (stressed segment word)
+		    (is-a 2nd-next 'r 'l 'n 'm))))
 	   (vowels word))))
 
 (defmacro trisyllabic-final-stress (&key (corpus '*corpus*))
@@ -152,4 +156,64 @@
 				(not (last-p (next-element segment word) word))
 				(is-a (next-element segment word) 'h)))
 			 (segments word))))
-		   
+
+(defmacro short-nasal-vowels (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+		   (some (lambda (segment)
+			   (and (vowel-p segment)
+				(not (long-p segment))
+				(nasal-p segment)
+				(not (is-a segment 'a))))
+			 (segments word))))
+
+(defmacro liquids+voiceless-fricatives (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+		   (some (lambda (segment)
+			   (and (is-a segment 'l 'r)
+				(is-a (next-element segment word) 'f 's 'sh)))
+			 (segments word))))
+
+;; FIXME: ugly
+
+(defun find-stress-patterns-all-lights (&key (corpus *corpus*))
+  (let ((patterns (mapcar (lambda (word-list)
+			    (mapcar #'stress (remove-if #'null word-list)))
+			  (mapcar (lambda (entry)
+				    (remove-if (lambda (word)
+							 (member 'l (length-pattern word)))
+						       (words entry)))
+				  corpus)))
+	(acc nil))
+    (dolist (entry patterns)
+      (dolist (pattern entry)
+	(pushnew pattern acc :test #'equal)))
+    acc))
+
+(defmacro hh-words (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (> (count 'l (length-pattern word)) 1)))
+
+(defmacro unstressed-diphthongs (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-next
+	       (and (not (stressed segment word))
+		    next
+		    (or (and (is-a segment 'e)
+			     (is-a next 'j))
+			(and (is-a segment 'a)
+			     (is-a next 'w))))))
+	   (vowels word))))
+
+(defmacro schwa-second-closed-syllable (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (let ((vowels (vowels word)))
+       (and (> (length vowels) 2)
+	    (let* ((3rd-vowel-from-end (nth (- (length vowels) 3) vowels))
+		   (2nd-vowel-from-end (nth (- (length vowels) 2) vowels))
+		   (next (next-element 2nd-vowel-from-end word))
+		   (2nd-next (next-element next word)))
+	      (and (stressed 3rd-vowel-from-end word)
+		   (is-a 2nd-vowel-from-end 'schwa)
+		   (consonant-p next)
+		   (consonant-p 2nd-next)))))))
