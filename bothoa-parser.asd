@@ -15,3 +15,8 @@
                (:static-file "cb-corpus")
                (:static-file "README")
                (:static-file "LICENSE")))
+
+(defpackage #:bothoa-config
+  (:export #:*base-directory*))
+(defparameter bothoa-config:*base-directory*
+  (make-pathname :name nil :type nil :defaults *load-truename*))

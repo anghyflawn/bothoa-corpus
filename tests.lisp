@@ -46,7 +46,8 @@
                             word-list))
       *corpus*
       :key #'words)
-     :key #'print-entry)
+     :test (lambda (x y)
+	     (equalp (print-entry x) (print-entry y))))
    (find-in-corpus nil (eql (length (vowels word)) 2))))
 
 

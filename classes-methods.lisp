@@ -45,7 +45,11 @@
   ((words
     :initarg :words
     :accessor words
-    :documentation "List of word objects")))
+    :documentation "List of word objects")
+   (page
+    :initarg :page
+    :accessor page
+    :documentation "The page in the book")))
 
 
 ;;; Methods
@@ -125,6 +129,14 @@
 			   "~{~A~^ ~}")))
     (with-output-to-string (stream)
       (format stream format-string (mapcar #'word->string (words entry))))))
+
+(defgeneric print-entry-with-page-number (entry &key strict)
+  (:documentation
+   "Pretty-print the entry including the page number"))
+
+(defmethod print-entry-with-page-number (entry &key (strict nil))
+  (with-output-to-string (str)
+    (format str "~50A~A" (print-entry entry :strict strict) (page entry))))
 
 (defgeneric next-element (element higher-element)
   (:documentation

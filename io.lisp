@@ -4,15 +4,18 @@
 
 (defparameter *corpus* nil)
 
+(defun prompt-for-new-file ()
+  (list (prompt "Input new file name: ")))
+
 (defmacro make-corpus-file (filename corpus-variable)
   "Used to find static files."
-  `(let ((corpus-file (cl-fad:file-exists-p (merge-pathnames (make-pathname :directory '(:relative "Lisp" "bothoa-parser")
-                                                                            :name ,filename)
-                                                             (user-homedir-pathname)))))
-     (if corpus-file
-         (defparameter ,corpus-variable (namestring corpus-file))
-         (progn (defparameter ,corpus-variable nil)
-                (format t "Sorry, file ~A not found! Please change the path in the definition of make-corpus-file in io.lisp~%" ,filename)))))
+   `(let ((corpus-file (cl-fad:file-exists-p (merge-pathnames (make-pathname :directory '(:relative "Lisp" "bothoa-parser")
+									     :name ,filename)
+							      (user-homedir-pathname)))))
+      (if corpus-file
+	  (defparameter ,corpus-variable (namestring corpus-file))
+	  (progn (defparameter ,corpus-variable nil)
+		 (format t "Sorry, file ~A not found! Please change the path in the definition of make-corpus-file in io.lisp~%" ,filename)))))
 
 (make-corpus-file "cb-corpus" *bothoa-corpus-file*)
 
@@ -125,23 +128,36 @@
 		   :stress (getf parsed 'stress-pattern)
 		   :lengths (getf parsed 'length-pattern))))
 
-(defun make-entry (str)
-  (make-instance 'entry :words (mapcar #'make-word
-				       (cl-ppcre:split "\\s" str))))
+(defun make-entry (str page)
+  (make-instance 'entry
+		 :words (mapcar #'make-word
+				       (cl-ppcre:split "\\s" str))
+		 :page page))
 
 (defun make-corpus (&optional (filename *bothoa-corpus-file*))
+  "Just iterate through the file line-by-line and push everything
+that's not a page number into the corpus"
   (setq *corpus* nil)
-  (iterate (for line in-file filename using #'read-line)
-	   (unless (every #'digit-char-p line)
-	     (pushnew (make-entry line) *corpus* ))))
+  (let ((page-number nil))
+    (iterate (for line in-file filename using #'read-line)
+	     (if (every #'digit-char-p line)
+		 (setq page-number (parse-integer line :junk-allowed t))
+		 (pushnew (make-entry line page-number) *corpus* )))))
 
-(defun print-query (entry-list &key (filename "result"))
+(defun print-query (entry-list &key (filename (merge-pathnames #p"result" bothoa-config:*base-directory*)))
+  "Take a list of entries and print them out into the REPL and into a
+result file"
   (with-open-file (file filename
                         :direction :output
                         :if-exists :supersede)
-    (let ((result (mapcar #'print-entry entry-list)))
-      (format file "~{~A~%~}" result)
-      (format t "~{~A~%~}" result))))
+    (let ((result (with-output-to-string (str)
+		    (format str "~{~A~%~}" (reverse (mapcar #'print-entry-with-page-number entry-list))))))
+      (format file result)
+      (format t result))))
+
+(defmacro q (symbol)
+  "I think I'm abusing something here, but it really saves typing"
+  `(print-query (,symbol)))
 
 ;;; Make the corpus when loaded
 (make-corpus)

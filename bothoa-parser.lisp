@@ -17,12 +17,13 @@
                    ,corpus
                    :key #'words)
     :test (lambda (x y)
-	    (equalp (print-entry x) (print-entry y)))))
+	    (string= (print-entry x) (print-entry y)))))
 
 (defmacro with-next (&body body)
   `(let* ((next (next-element segment word))
 	  (2nd-next (next-element next word)))
-     ,@body))
+     (and next
+	  ,@body)))
 
 (defmacro find-entry-with-sequence ((&key (corpus '*corpus*)) sequence)
   `(find-in-corpus (:corpus ,corpus)
@@ -48,7 +49,7 @@
    form can be used to narrow down the search"
   `(find-in-corpus (:corpus ,corpus)
      (and (eql (length (vowels word)) 3)
-	  (not (member (ipa-symbol (second (vowels word))) '(schwa i))) ; Comment this out...
+	  (not (is-a (second (vowels word)) 'schwa 'i)) ; Comment this out...
 ;	  (equal (ipa-symbol (second (vowels word))) 'low-e) ; ... to narrow down the search here
 	  (equal (first (stress word)) 'm))))
 
@@ -73,8 +74,7 @@
 	     (with-next
 	       (and (long-p segment) ; Loads of clauses here.
 		    (not (nasal-p segment))
-		    (not (null next))
-		    (not (null 2nd-next))
+		    2nd-next
 		    (consonant-p next)
 		    (stressed segment word)
 		    (is-a 2nd-next 'r 'l 'n 'm))))
@@ -106,8 +106,8 @@
   `(find-in-corpus (:corpus ,corpus)
      (some (lambda (segment)
 	     (and (member (ipa-symbol segment) '(n m ng))
-		  (member (ipa-symbol (next-element segment word)) '(f v s z sh zh h))
-		  (null (next-element (next-element segment word) word))))
+		  (member (ipa-symbol (next-element segment word)) '(f v s z sh zh h))))
+;		  (null (next-element (next-element segment word) word))))
 	   (segments word))))
 
 (defmacro stop-sequences (&key (corpus '*corpus*))
@@ -198,7 +198,6 @@
      (some (lambda (segment)
 	     (with-next
 	       (and (not (stressed segment word))
-		    next
 		    (or (and (is-a segment 'e)
 			     (is-a next 'j))
 			(and (is-a segment 'a)
@@ -217,3 +216,26 @@
 		   (is-a 2nd-vowel-from-end 'schwa)
 		   (consonant-p next)
 		   (consonant-p 2nd-next)))))))
+
+(defmacro unstressed-nasal-vowels (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (and (nasal-p segment)
+		  (not (stressed segment word))))
+	   (vowels word))))
+
+(defmacro vowel-final-monosyllables (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (and (= 1 (length (vowels word)))
+	  (let ((vowel (car (vowels word))))
+	    (and (stressed vowel word)
+		 (last-p vowel word))))))
+
+(defmacro find-hiatus (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-next
+	       (and (is-a segment 'i 'y 'u)
+		    (not (long-p segment))
+		    (vowel-p next))))
+	   (vowels word))))
