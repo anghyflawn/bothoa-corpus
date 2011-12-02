@@ -60,11 +60,19 @@
 (defmethod vowel-p ((segment segment))
   (equal (type-of segment) 'vowel))
 
+(defmethod vowel-p ((segment null))
+  (declare (ignore segment))
+  nil)
+
 (defgeneric consonant-p (segment)
   (:documentation "Is the segment a consonant?"))
 
 (defmethod consonant-p ((segment segment))
-  (equal (type-of segment) 'consonant))
+  (typep segment 'consonant))
+
+(defmethod long-p (segment)
+  (declare (ignore segment))
+  nil)
 
 (defgeneric (setf ipa-symbol) (segment symbol)
   (:documentation "Automatic accessors choke on null inputs, so we roll our own"))
@@ -156,6 +164,19 @@ e.g. the next segment in a word etc."))
     (nth (1+ (position segment segment-list)) segment-list)))
 
 (defmethod next-element ((segment null) word)
+  nil)
+
+(defgeneric previous-element (element higher-element)
+  (:documentation "Get the preceding element"))
+
+(defmethod previous-element ((segment segment) (word word))
+  (let* ((segments (segments word))
+	 (segment-position (position segment segments)))
+    (when (> segment-position 0)
+      (nth (1- segment-position) segments))))
+	
+
+(defmethod previous-element ((segment null) word)
   nil)
 
 (defgeneric next-vowel (vowel word)

@@ -7,20 +7,20 @@
 (defun make-test-corpus (&optional (filename *test-corpus-file*))
   (setf *test-corpus* nil)
   (iterate (for line in-file filename using #'read-line)
-	   (pushnew (make-entry line) *test-corpus*)))
+	   (push (make-entry line 0) *test-corpus*)))
 
 (make-test-corpus)
 
 (define-test make-entry
-  (assert-equal "tˈaːɲər" (print-entry (make-entry "ˈtaːɲər")))
-  (assert-equal "tʃˈẽːzəɡˌon" (print-entry (make-entry "ˈtʃẽːzəˌɡon"))))
+  (assert-equal "tˈaːɲər" (print-entry (make-entry "ˈtaːɲər" 0)))
+  (assert-equal "tʃˈẽːzəɡˌon" (print-entry (make-entry "ˈtʃẽːzəˌɡon" 0))))
 
 (define-test next-segment
   (assert-equal "e" (segment->string (let ((word (make-word "ten")))
 				       (next-element (first (segments word)) word))))
   (assert-equal "ãː" (segment->string (let ((word (make-word "stʃãːs")))
 					(next-element (second (segments word)) word))))
-  (assert-equal "d" (segment->string (let* ((entry (make-entry "abc def"))
+  (assert-equal "d" (segment->string (let* ((entry (make-entry "abc def" 0))
 					    (word (first (words entry))))
 				       (next-element (third (segments word)) entry)))))
 
@@ -47,7 +47,7 @@
       *corpus*
       :key #'words)
      :test (lambda (x y)
-	     (equalp (print-entry x) (print-entry y))))
+	     (string= (print-entry x) (print-entry y))))
    (find-in-corpus nil (eql (length (vowels word)) 2))))
 
 

@@ -20,9 +20,20 @@
 	    (string= (print-entry x) (print-entry y)))))
 
 (defmacro with-next (&body body)
-  `(let* ((next (next-element segment word))
-	  (2nd-next (next-element next word)))
+  `(let ((next (next-element segment word)))
      (and next
+	  ,@body)))
+
+
+(defmacro with-2nd-next (&body body)
+  `(with-next
+     (let ((2nd-next (next-element next word)))
+       (and 2nd-next
+	    ,@body))))
+
+(defmacro with-previous (&body body)
+  `(let ((previous (previous-element segment word)))
+     (and previous
 	  ,@body)))
 
 (defmacro find-entry-with-sequence ((&key (corpus '*corpus*)) sequence)
@@ -50,8 +61,16 @@
   `(find-in-corpus (:corpus ,corpus)
      (and (eql (length (vowels word)) 3)
 	  (not (is-a (second (vowels word)) 'schwa 'i)) ; Comment this out...
-;	  (equal (ipa-symbol (second (vowels word))) 'low-e) ; ... to narrow down the search here
+;	  (is-a (second (vowels word)) 'o) ; ... to narrow down the search here
 	  (equal (first (stress word)) 'm))))
+
+(defmacro find-weak-vowels (vowel &key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (and (not (stressed segment word))
+		  (not (eq segment (car (last (vowels word)))))
+		  (is-a segment ,vowel)))
+	   (vowels word))))
 
 (defmacro sequences-after-long-oe (&key (corpus '*corpus*))
   `(find-in-corpus (:corpus ,corpus)
@@ -71,10 +90,9 @@
 (defmacro long-before-muta-cum-liquida (&key (corpus '*corpus*))
   `(find-in-corpus (:corpus ,corpus)
      (some (lambda (segment)
-	     (with-next
+	     (with-2nd-next
 	       (and (long-p segment) ; Loads of clauses here.
 		    (not (nasal-p segment))
-		    2nd-next
 		    (consonant-p next)
 		    (stressed segment word)
 		    (is-a 2nd-next 'r 'l 'n 'm))))
@@ -239,3 +257,25 @@
 		    (not (long-p segment))
 		    (vowel-p next))))
 	   (vowels word))))
+
+(defmacro find-preconsonantal-glides (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-next
+	       (let ((previous  (previous-element segment word)))
+		 (and (is-a segment 'w 'j 'turned-h)
+		      (consonant-p next)
+		      (or (not previous)
+			  (not (vowel-p previous)))))))
+	     (segments word))))
+
+(defmacro find-prevocalic-y (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-next
+	       (with-previous
+		 (and (is-a segment 'turned-h)
+		      (not (long-p segment))
+		      (vowel-p next)
+		      (not (is-a previous 'dz 'ts))))))
+	     (segments word))))
