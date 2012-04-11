@@ -127,7 +127,7 @@
 		   (print-segment (cdr segment-list) stress-pattern output-list))
 		 (nreverse output-list))))
     (apply #'concatenate 'string (print-segment (segments word) (stress word) nil))))
-		   
+
 (defgeneric print-entry (entry &key strict)
   (:documentation "Pretty-print an entry"))
 
@@ -174,7 +174,7 @@ e.g. the next segment in a word etc."))
 	 (segment-position (position segment segments)))
     (when (> segment-position 0)
       (nth (1- segment-position) segments))))
-	
+
 
 (defmethod previous-element ((segment null) word)
   nil)
@@ -216,3 +216,6 @@ e.g. the next segment in a word etc."))
 
 (defmethod is-a ((segment segment) &rest segment-list)
   (member (ipa-symbol segment) segment-list))
+
+(defmethod print-object ((object entry) stream)
+  (format stream (print-entry object)))

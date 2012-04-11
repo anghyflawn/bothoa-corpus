@@ -41,12 +41,16 @@
      (search (mapcar #'ipa-symbol (getf (parse (coerce ,sequence 'list))
 					'segment-list))
 	     (mapcar #'ipa-symbol (segments word)))))
-		     
-		      
+
+
 (defmacro find-entry-with-stress-pattern ((&key (corpus '*corpus*)) stress-pattern)
   `(find-in-corpus (:corpus ,corpus)
      (equal ,stress-pattern (stress word))))
- 
+
+(defmacro find-hl (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (equal (length-pattern word) '(h l))))
+
 (defmacro find-vowel-sequence ((&key (corpus '*corpus*)) sym1 sym2)
   `(find-in-corpus (:corpus ,corpus)
      (some (lambda (vowel)
@@ -83,7 +87,7 @@
 		  (consonant-p (next-element vowel word))
 		  (consonant-p (next-element (next-element vowel word) word))))
 	   (vowels word))))
-     
+
 ;; FIXME: The next function is kind of ugly because not all methods
 ;; are set up to deal with null arguments.
 
@@ -279,3 +283,49 @@
 		      (vowel-p next)
 		      (not (is-a previous 'dz 'ts))))))
 	     (segments word))))
+
+(defmacro find-final-stresses (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (and (> (length (vowels word)) 1)
+	  (stressed (car (last (vowels word))) word)
+	  (last-p (car (last (vowels word))) word))))
+
+(defmacro find-ssr-violations (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-2nd-next
+	       (and (vowel-p segment)
+		    (long-p segment)
+		    (not (vowel-p next))
+		    (not (is-a next 'p 't 'k 'b 'd 'g 'v 'f))
+		    (not (or (vowel-p 2nd-next)
+			     (is-a 2nd-next 'f 'j))))))
+	   (vowels word))))
+
+(defmacro find-eo-hiatus (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-next
+	       (and (is-a segment 'high-e 'high-o)
+		    (not (long-p segment))
+		    (vowel-p next))))
+	   (vowels word))))
+
+(defmacro find-i-in-hiatus (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-2nd-next
+	       (and (is-a segment 't 'd 's 'z 'n)
+		    (is-a next 'i)
+		    (not (long-p next))
+		    (vowel-p 2nd-next))))
+	   (segments word))))
+
+(defmacro find-vowels-before-comparative (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-2nd-next
+	       (and (vowel-p segment)
+		    (is-a next 'low-o)
+		    (is-a 2nd-next 'h))))
+	   (vowels word))))

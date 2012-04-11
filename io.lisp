@@ -9,7 +9,7 @@
 
 (defmacro make-corpus-file (filename corpus-variable)
   "Used to find static files."
-   `(let ((corpus-file (cl-fad:file-exists-p (merge-pathnames (make-pathname :directory '(:relative "Lisp" "bothoa-parser")
+   `(let ((corpus-file (cl-fad:file-exists-p (merge-pathnames (make-pathname :directory '(:relative "Dropbox" "alldocs" "thesis" "part2")
 									     :name ,filename)
 							      (user-homedir-pathname)))))
       (if corpus-file

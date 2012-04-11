@@ -1,6 +1,6 @@
 ;;;; package.lisp
 
-(defpackage #:bothoa-parser
+(defpackage #:bothoa-corpus
   (:use #:cl
 	#:iterate
 	#:lisp-unit))

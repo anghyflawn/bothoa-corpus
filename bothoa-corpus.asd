@@ -1,6 +1,6 @@
 ;;;; bothoa-parser.asd
 
-(asdf:defsystem #:bothoa-parser
+(asdf:defsystem #:bothoa-corpus
   :serial t
   :depends-on (#:cl-ppcre
                #:iterate
@@ -9,7 +9,7 @@
   :components ((:file "package")
                (:file "classes-methods")
 	       (:file "io")
-               (:file "bothoa-parser")
+               (:file "bothoa-corpus")
 	       (:file "tests")
                (:static-file "test-corpus")
                (:static-file "cb-corpus")
@@ -18,5 +18,6 @@
 
 (defpackage #:bothoa-config
   (:export #:*base-directory*))
+
 (defparameter bothoa-config:*base-directory*
   (make-pathname :name nil :type nil :defaults *load-truename*))
