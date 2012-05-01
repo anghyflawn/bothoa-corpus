@@ -1,7 +1,7 @@
 ;;;; -*- Mode: Lisp; Syntax: Common-Lisp -*-
 ;;;; bothoa-parser.lisp
 
-(in-package #:bothoa-parser)
+(in-package #:bothoa-corpus)
 
 ;;; "bothoa-parser" goes here. Hacks and glory await!
 

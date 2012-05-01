@@ -1,4 +1,4 @@
-(in-package #:bothoa-parser)
+(in-package #:bothoa-corpus)
 
 ;;; Globals
 
