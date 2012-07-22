@@ -1,4 +1,4 @@
-(in-package #:bothoa-lisp)
+(in-package #:bothoa-corpus)
 
 (defparameter *test-corpus* nil)
 
@@ -7,20 +7,20 @@
 (defun make-test-corpus (&optional (filename *test-corpus-file*))
   (setf *test-corpus* nil)
   (iterate (for line in-file filename using #'read-line)
-	   (push (make-entry line 0) *test-corpus*)))
+	   (push (make-entry line) *test-corpus*)))
 
 (make-test-corpus)
 
 (define-test make-entry
-  (assert-equal "tˈaːɲər" (print-entry (make-entry "ˈtaːɲər" 0)))
-  (assert-equal "tʃˈẽːzəɡˌon" (print-entry (make-entry "ˈtʃẽːzəˌɡon" 0))))
+  (assert-equal "tˈaːɲər" (print-entry (make-entry "ˈtaːɲər")))
+  (assert-equal "tʃˈẽːzəɡˌon" (print-entry (make-entry "ˈtʃẽːzəˌɡon"))))
 
 (define-test next-segment
   (assert-equal "e" (segment->string (let ((word (make-word "ten")))
 				       (next-element (first (segments word)) word))))
-  (assert-equal "ãː" (segment->string (let ((word (make-word "stʃãːs")))
+  (assert-equal "ãː" (segment->string (let ((word (make-word "stʃãːs")))
 					(next-element (second (segments word)) word))))
-  (assert-equal "d" (segment->string (let* ((entry (make-entry "abc def" 0))
+  (assert-equal "d" (segment->string (let* ((entry (make-entry "abc def"))
 					    (word (first (words entry))))
 				       (next-element (third (segments word)) entry)))))
 
@@ -52,4 +52,4 @@
 
 
 (defun test-all ()
-  (lisp-unit:run-all-tests :bothoa-parser))
+  (lisp-unit:run-all-tests :bothoa-corpus))

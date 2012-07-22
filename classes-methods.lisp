@@ -61,7 +61,6 @@
   (equal (type-of segment) 'vowel))
 
 (defmethod vowel-p ((segment null))
-  (declare (ignore segment))
   nil)
 
 (defgeneric consonant-p (segment)
@@ -70,8 +69,7 @@
 (defmethod consonant-p ((segment segment))
   (typep segment 'consonant))
 
-(defmethod long-p (segment)
-  (declare (ignore segment))
+(defmethod long-p ((segment null))
   nil)
 
 (defgeneric (setf ipa-symbol) (segment symbol)

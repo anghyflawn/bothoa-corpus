@@ -114,21 +114,21 @@
 						       (push 's length-list)))
 				(otherwise (push 's length-list)))))))
 	     (parse (cdr input-list) output-list stress-list stress length-list))
-     (list 'segment-list (nreverse output-list)
-	    'stress-pattern (nreverse stress-list)
-	    'length-pattern (nreverse length-list))))
+     (list :segment-list (nreverse output-list)
+	   :stress-pattern (nreverse stress-list)
+	   :length-pattern (nreverse length-list))))
 
 (defun str->word (str)
    (parse (coerce str 'list)))
 
 (defun make-word (str)
-  (let ((parsed (str->word str)))
+  (destructuring-bind (&key segment-list stress-pattern length-pattern) (str->word str)
     (make-instance 'word
-		   :segments (getf parsed 'segment-list)
-		   :stress (getf parsed 'stress-pattern)
-		   :lengths (getf parsed 'length-pattern))))
+		   :segments segment-list
+		   :stress stress-pattern
+		   :lengths length-pattern)))
 
-(defun make-entry (str page)
+(defun make-entry (str &optional (page 0))
   (make-instance 'entry
 		 :words (mapcar #'make-word
 				       (cl-ppcre:split "\\s" str))
