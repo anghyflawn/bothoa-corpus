@@ -329,3 +329,12 @@
 		    (is-a next 'low-o)
 		    (is-a 2nd-next 'h))))
 	   (vowels word))))
+
+(defmacro find-long-i-in-hiatus (&key (corpus '*corpus*))
+  `(find-in-corpus (:corpus ,corpus)
+     (some (lambda (segment)
+	     (with-next
+	       (and (is-a segment 'i)
+		    (long-p segment)
+		    (vowel-p next))))
+	   (vowels word))))

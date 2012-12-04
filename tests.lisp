@@ -51,5 +51,5 @@
    (find-in-corpus nil (eql (length (vowels word)) 2))))
 
 
-(defun test-all ()
-  (lisp-unit:run-all-tests :bothoa-corpus))
+;(defun test-all ()
+;  (lisp-unit:run-all-tests :bothoa-corpus))
